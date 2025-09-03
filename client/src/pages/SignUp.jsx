@@ -1,29 +1,28 @@
 import React, { useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
 
 export default function SignUp() {
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleGoogleSuccess = async (credentialResponse) => {
     setIsLoading(true);
     try {
       const id_token = credentialResponse.credential;
 
-      const res = await fetch("http://localhost:5000/auth/google", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json" 
-        },
-        body: JSON.stringify({ id_token, action: "signup" }),
+      const res = await axios.post("http://localhost:5000/api/auth/google", {
+        id_token,
+        action: "signup"
       });
 
-      const data = await res.json();
+      const data = res.data;
       
-      if (res.ok) {
-        // Store token securely (in a real app, consider using httpOnly cookies)
-        localStorage.setItem("accessToken", data.accessToken);
-        localStorage.setItem("user", JSON.stringify(data.user));
+      if (res.status === 200) {
+        login(data.user, data.accessToken);
         
         if (data.isNewUser) {
           alert(`Welcome ${data.user.name}! Your account has been created successfully.`);
@@ -31,14 +30,12 @@ export default function SignUp() {
           alert(`Welcome back ${data.user.name}! You already have an account.`);
         }
         
-        // Navigate to dashboard or home page
-        // navigate('/dashboard');
-      } else {
-        alert(data.message || "Sign up failed. Please try again.");
+        navigate('/dashboard');
       }
     } catch (error) {
       console.error("Sign up error:", error);
-      alert("Network error. Please check your connection and try again.");
+      const message = error.response?.data?.message || "Network error. Please check your connection and try again.";
+      alert(message);
     } finally {
       setIsLoading(false);
     }
