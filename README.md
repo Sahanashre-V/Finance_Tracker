@@ -39,9 +39,6 @@ A full-stack assignment for building an AI-powered personal finance tracker with
 - `"I just bought a $250 Samsung Galaxy watch - Electronics"`
 - `"Ordered Panda Express for $25"`
 - `"Got paid $3500 salary today"`
-- `"Spent 45 dollars on gas at Shell"`
-- `"Coffee at Starbucks $6.50"`
-
 ---
 
 ### 📊 Dashboard + Transaction History
@@ -74,7 +71,7 @@ A full-stack assignment for building an AI-powered personal finance tracker with
 
 ### Backend
 - **Framework:** Node.js + Express
-- **Database:** MongoDB or PostgreSQL
+- **Database:** MongoDB 
 - **Auth:** Google OAuth server verification + JWT
 - **AI Integration:** OpenAI GPT-4 or Google Gemini
 - **API Design:** RESTful with error handling
