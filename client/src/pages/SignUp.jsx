@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from '../context/AuthContext';
+import { Auth } from '../context/AuthContext';
 import axios from 'axios';
 
 export default function SignUp() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login } = Auth();
 
   const handleGoogleSuccess = async (credentialResponse) => {
     setIsLoading(true);
@@ -24,6 +24,8 @@ export default function SignUp() {
       if (res.status === 200) {
         login(data.user, data.accessToken);
         
+        localStorage.setItem('token', data.accessToken);
+
         if (data.isNewUser) {
           alert(`Welcome ${data.user.name}! Your account has been created successfully.`);
         } else {

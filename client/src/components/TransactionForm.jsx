@@ -20,7 +20,12 @@ const TransactionForm = ({ onTransactionAdded }) => {
 
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/transactions/parse', { input });
+      const response = await axios.post('http://localhost:5000/api/transactions/parse', { input }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      }
+      );
       setParsedTransaction({
         ...response.data.parsed,
         originalInput: input
@@ -40,7 +45,12 @@ const TransactionForm = ({ onTransactionAdded }) => {
     try {
       const response = await axios.post('http://localhost:5000/api/transactions', {
         ...parsedTransaction,
-        aiParsed: true
+        aiParsed: true,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       });
       
       onTransactionAdded(response.data);
@@ -75,7 +85,11 @@ const TransactionForm = ({ onTransactionAdded }) => {
         aiParsed: false
       };
 
-      const response = await axios.post('http://localhost:5000/api/transactions', transaction);
+      const response = await axios.post('http://localhost:5000/api/transactions', transaction, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
       onTransactionAdded(response.data);
       e.target.reset();
       setShowForm(false);

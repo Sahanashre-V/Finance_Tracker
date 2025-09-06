@@ -18,8 +18,8 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/api', auth); 
-app.use('/api', analytics);
-app.use('/api', transactions);
+app.use('/api/', analytics);
+app.use('/api/', transactions);
 
 // MongoDB connection (optional for now)
 if (process.env.MONGODB_URI) {

@@ -5,16 +5,33 @@ const verifyToken = require('../middleware/auth');
 const router = express.Router();
 
 // Summary
-router.get('/summary', verifyToken, async (req, res) => {
+router.get('/analytics/summary', verifyToken, async (req, res) => {
   try {
+    console.log('Summary request:', {
+      userId: req.user.userId,
+      query: req.query
+    });
+
     const { startDate, endDate } = req.query;
     const dateFilter = { userId: req.user.userId };
 
     if (startDate || endDate) {
       dateFilter.date = {};
-      if (startDate) dateFilter.date.$gte = new Date(startDate);
-      if (endDate) dateFilter.date.$lte = new Date(endDate);
+      if (startDate) {
+        dateFilter.date.$gte = new Date(startDate);
+        console.log('Start date filter:', new Date(startDate));
+      }
+      if (endDate) {
+        dateFilter.date.$lte = new Date(endDate);
+        console.log('End date filter:', new Date(endDate));
+      }
     }
+
+    console.log('Date filter:', dateFilter);
+
+    // Check if user has any transactions
+    const totalTransactions = await Transaction.countDocuments({ userId: req.user.userId });
+    console.log('Total transactions for user:', totalTransactions);
 
     const [incomeResult, expenseResult] = await Promise.all([
       Transaction.aggregate([
@@ -27,26 +44,37 @@ router.get('/summary', verifyToken, async (req, res) => {
       ])
     ]);
 
+    console.log('Income result:', incomeResult);
+    console.log('Expense result:', expenseResult);
+
     const income = incomeResult[0]?.total || 0;
     const expenses = expenseResult[0]?.total || 0;
     const savings = income - expenses;
     const savingsRate = income > 0 ? (savings / income) * 100 : 0;
 
-    res.json({ 
+    const result = { 
       income, 
       expenses, 
       savings, 
       savingsRate 
-    });
+    };
+
+    console.log('Summary result:', result);
+    res.json(result);
   } catch (error) {
     console.error('Summary error:', error);
-    res.status(500).json({ message: 'Failed to fetch summary' });
+    res.status(500).json({ message: 'Failed to fetch summary', error: error.message });
   }
 });
 
 // Categories
-router.get('/categories', verifyToken, async (req, res) => {
+router.get('/analytics/categories', verifyToken, async (req, res) => {
   try {
+    console.log('Categories request:', {
+      userId: req.user.userId,
+      query: req.query
+    });
+
     const { startDate, endDate, type = 'expense' } = req.query;
     const dateFilter = { userId: req.user.userId, type };
 
@@ -55,6 +83,8 @@ router.get('/categories', verifyToken, async (req, res) => {
       if (startDate) dateFilter.date.$gte = new Date(startDate);
       if (endDate) dateFilter.date.$lte = new Date(endDate);
     }
+
+    console.log('Categories date filter:', dateFilter);
 
     const categories = await Transaction.aggregate([
       { $match: dateFilter },
@@ -68,25 +98,40 @@ router.get('/categories', verifyToken, async (req, res) => {
       { $sort: { total: -1 } }
     ]);
 
+    console.log('Categories raw result:', categories);
+
     const result = categories.map(cat => ({ 
       category: cat._id, 
       amount: cat.total, 
       count: cat.count 
     }));
 
+    console.log('Categories result:', result);
     res.json(result);
   } catch (error) {
     console.error('Categories error:', error);
-    res.status(500).json({ message: 'Failed to fetch categories' });
+    res.status(500).json({ message: 'Failed to fetch categories', error: error.message });
   }
 });
 
 // Trends
-router.get('/trends', verifyToken, async (req, res) => {
+router.get('/analytics/trends', verifyToken, async (req, res) => {
   try {
+    console.log('Trends request:', {
+      userId: req.user.userId,
+      query: req.query
+    });
+
     const { period = 'daily', days = 30 } = req.query;
     const startDate = new Date();
-    startDate.setDate(startDate.getDate() - parseInt(days));
+    const daysNum = parseInt(days);
+    startDate.setDate(startDate.getDate() - daysNum);
+
+    console.log('Trends date range:', {
+      startDate,
+      endDate: new Date(),
+      days: daysNum
+    });
 
     const groupBy = period === 'daily'
       ? { 
@@ -99,13 +144,15 @@ router.get('/trends', verifyToken, async (req, res) => {
           month: { $month: '$date' } 
         };
 
+    const matchFilter = { 
+      userId: req.user.userId, 
+      date: { $gte: startDate } 
+    };
+
+    console.log('Trends match filter:', matchFilter);
+
     const trends = await Transaction.aggregate([
-      { 
-        $match: { 
-          userId: req.user.userId, 
-          date: { $gte: startDate } 
-        } 
-      },
+      { $match: matchFilter },
       { 
         $group: { 
           _id: { ...groupBy, type: '$type' }, 
@@ -121,10 +168,11 @@ router.get('/trends', verifyToken, async (req, res) => {
       }
     ]);
 
+    console.log('Trends result:', trends);
     res.json(trends);
   } catch (error) {
     console.error('Trends error:', error);
-    res.status(500).json({ message: 'Failed to fetch trends' });
+    res.status(500).json({ message: 'Failed to fetch trends', error: error.message });
   }
 });
 

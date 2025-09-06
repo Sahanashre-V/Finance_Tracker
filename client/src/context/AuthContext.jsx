@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
-export const useAuth = () => {
+export const Auth = () => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within AuthProvider');
@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
-        return localStorage.getItem('accessToken');
+        return localStorage.getItem('token');
       } catch {
         return null;
       }
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
       delete axios.defaults.headers.common['Authorization'];
     }
     // Fixed: Use the correct environment variable and port
-    axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+    axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
   }, [token]);
 
   // Check authentication status on mount
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const savedToken = localStorage.getItem('accessToken');
+        const savedToken = localStorage.getItem('token');
         const savedUser = localStorage.getItem('user');
         
         if (savedToken && savedUser) {
