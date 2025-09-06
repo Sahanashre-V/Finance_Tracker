@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Auth } from '../context/AuthContext';
 import TransactionForm from '../components/TransactionForm';
 import TransactionList from '../components/TransactionList';
 import Charts from '../components/Charts';
@@ -7,7 +7,7 @@ import { TrendingUp, TrendingDown, DollarSign, PiggyBank, LogOut, User } from 'l
 import axios from 'axios';
 
 const Dashboard = () => {
-  const { user, logout } = useAuth();
+  const { user, logout } = Auth();
   const [transactions, setTransactions] = useState([]);
   const [analytics, setAnalytics] = useState({
     summary: { income: 0, expenses: 0, savings: 0, savingsRate: 0 },
@@ -17,80 +17,132 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('30'); // days
 
-  useEffect(() => {
-    fetchData();
-  }, [dateRange]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const endDate = new Date();
       const startDate = new Date();
-      startDate.setDate(startDate.getDate() - parseInt(dateRange));
+      
+      // Improved date calculation
+      const days = parseInt(dateRange);
+      startDate.setDate(startDate.getDate() - days);
+
+      // Check if token exists
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      console.log('Fetching data with date range:', {
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        days: dateRange
+      });
+
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
 
       const [transactionsRes, summaryRes, categoriesRes, trendsRes] = await Promise.all([
-        axios.get('/api/transactions', {
+        axios.get('http://localhost:5000/api/transactions', {
           params: {
             startDate: startDate.toISOString(),
             endDate: endDate.toISOString(),
             limit: 100
-          }
+          },
+          headers
         }),
-        axios.get('/api/analytics/summary', {
+        axios.get('http://localhost:5000/api/analytics/summary', {
           params: {
             startDate: startDate.toISOString(),
             endDate: endDate.toISOString()
-          }
+          },
+          headers
         }),
-        axios.get('/api/analytics/categories', {
+        axios.get('http://localhost:5000/api/analytics/categories', {
           params: {
             startDate: startDate.toISOString(),
             endDate: endDate.toISOString(),
             type: 'expense'
-          }
+          },
+          headers
         }),
-        axios.get('/api/analytics/trends', {
+        axios.get('http://localhost:5000/api/analytics/trends', {
           params: {
             period: 'daily',
             days: dateRange
-          }
+          },
+          headers
         })
       ]);
 
-      setTransactions(transactionsRes.data.transactions);
-      setAnalytics({
+      console.log('API Responses:', {
+        transactions: transactionsRes.data,
         summary: summaryRes.data,
         categories: categoriesRes.data,
         trends: trendsRes.data
       });
+
+      // Handle different response structures
+      setTransactions(transactionsRes.data.transactions || transactionsRes.data || []);
+      setAnalytics({
+        summary: summaryRes.data || { income: 0, expenses: 0, savings: 0, savingsRate: 0 },
+        categories: categoriesRes.data || [],
+        trends: trendsRes.data || []
+      });
     } catch (error) {
       console.error('Failed to fetch data:', error);
-      alert('Failed to load dashboard data. Please refresh the page.');
+      
+      // More detailed error handling
+      if (error.response) {
+        console.error('Response error:', error.response.data);
+        console.error('Status:', error.response.status);
+        
+        if (error.response.status === 401) {
+          alert('Your session has expired. Please log in again.');
+          logout();
+          return;
+        }
+        
+        alert(`Server error: ${error.response.data.message || error.response.status}`);
+      } else if (error.request) {
+        console.error('Request error:', error.request);
+        alert('Unable to connect to server. Please check if the server is running.');
+      } else {
+        console.error('Error:', error.message);
+        alert(`Error: ${error.message}`);
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, [dateRange, logout]);
 
-  const handleTransactionAdded = (newTransaction) => {
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleTransactionAdded = useCallback((newTransaction) => {
     setTransactions(prev => [newTransaction, ...prev]);
     fetchData(); // Refresh analytics
-  };
+  }, [fetchData]);
 
-  const handleTransactionUpdated = (updatedTransaction) => {
+  const handleTransactionUpdated = useCallback((updatedTransaction) => {
     setTransactions(prev => 
       prev.map(t => t._id === updatedTransaction._id ? updatedTransaction : t)
     );
     fetchData(); // Refresh analytics
-  };
+  }, [fetchData]);
 
-  const handleTransactionDeleted = (deletedId) => {
+  const handleTransactionDeleted = useCallback((deletedId) => {
     setTransactions(prev => prev.filter(t => t._id !== deletedId));
     fetchData(); // Refresh analytics
-  };
+  }, [fetchData]);
 
   const handleLogout = async () => {
     try {
-      await axios.post('/auth/logout');
+      await axios.post('http://localhost:5000/api/auth/logout');
+      localStorage.removeItem('token');
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
@@ -164,7 +216,7 @@ const Dashboard = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Income</p>
                 <p className="text-2xl font-bold text-green-600">
-                  ${analytics.summary.income.toFixed(2)}
+                  ${(analytics.summary.income || 0).toFixed(2)}
                 </p>
               </div>
               <div className="p-3 bg-green-100 rounded-full">
@@ -178,7 +230,7 @@ const Dashboard = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Expenses</p>
                 <p className="text-2xl font-bold text-red-600">
-                  ${analytics.summary.expenses.toFixed(2)}
+                  ${(analytics.summary.expenses || 0).toFixed(2)}
                 </p>
               </div>
               <div className="p-3 bg-red-100 rounded-full">
@@ -191,8 +243,8 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Net Savings</p>
-                <p className={`text-2xl font-bold ${analytics.summary.savings >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                  ${analytics.summary.savings.toFixed(2)}
+                <p className={`text-2xl font-bold ${(analytics.summary.savings || 0) >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                  ${(analytics.summary.savings || 0).toFixed(2)}
                 </p>
               </div>
               <div className="p-3 bg-blue-100 rounded-full">
@@ -205,8 +257,8 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Savings Rate</p>
-                <p className={`text-2xl font-bold ${analytics.summary.savingsRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {analytics.summary.savingsRate.toFixed(1)}%
+                <p className={`text-2xl font-bold ${(analytics.summary.savingsRate || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {(analytics.summary.savingsRate || 0).toFixed(1)}%
                 </p>
               </div>
               <div className="p-3 bg-yellow-100 rounded-full">

@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from '../context/AuthContext';
+import { Auth } from '../context/AuthContext';
 import axios from 'axios';
 import "../App.css";
 
 export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login } = Auth();
 
   const handleGoogleSuccess = async (credentialResponse) => {
     setIsLoading(true);
@@ -26,6 +26,7 @@ export default function SignIn() {
         login(data.user, data.accessToken);
         navigate('/dashboard');
       }
+      localStorage.setItem('token', data.accessToken);
     } catch (error) {
       console.error("Sign in error:", error);
       const message = error.response?.data?.message || "Network error. Please check your connection and try again.";

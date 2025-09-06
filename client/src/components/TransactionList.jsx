@@ -34,7 +34,12 @@ const TransactionList = ({ transactions, onTransactionUpdated, onTransactionDele
 
   const handleSave = async (id) => {
     try {
-      const response = await axios.put(`/api/transactions/${id}`, editForm);
+      const response = await axios.put(`http://localhost:5000/api/transactions/${id}`, editForm, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      await
       onTransactionUpdated(response.data);
       setEditingId(null);
       setEditForm({});
@@ -51,7 +56,11 @@ const TransactionList = ({ transactions, onTransactionUpdated, onTransactionDele
     }
 
     try {
-      await axios.delete(`/api/transactions/${id}`);
+      await axios.delete(`http://localhost:5000/api/transactions/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
       onTransactionDeleted(id);
       alert('Transaction deleted successfully!');
     } catch (error) {
