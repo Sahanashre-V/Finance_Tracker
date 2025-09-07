@@ -165,7 +165,7 @@ router.post("/auth/google", async (req, res) => {
         googleId: user.googleId 
       },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "1d" }
     );
 
     console.log("✓ Authentication successful for user:", user._id);
@@ -217,7 +217,7 @@ router.post("/auth/google", async (req, res) => {
 });
 
 // Get Profile
-router.get("/profile", verifyToken, async (req, res) => {
+router.get("/auth/profile", verifyToken, async (req, res) => {
   try {
     console.log("Fetching profile for user:", req.user.userId);
     
@@ -245,7 +245,7 @@ router.get("/profile", verifyToken, async (req, res) => {
 });
 
 // Logout (invalidate token on frontend)
-router.post("/logout", verifyToken, (req, res) => {
+router.post("/auth/logout", verifyToken, (req, res) => {
   console.log("User logged out:", req.user.userId);
   res.json({ 
     success: true,
@@ -254,7 +254,7 @@ router.post("/logout", verifyToken, (req, res) => {
 });
 
 // Verify Token
-router.get("/verify", verifyToken, (req, res) => {
+router.get("/auth/verify", verifyToken, (req, res) => {
   res.json({ 
     success: true,
     valid: true, 

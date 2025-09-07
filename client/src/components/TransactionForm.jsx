@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Brain, Check, X } from 'lucide-react';
+import { Auth } from '../context/AuthContext';
 import axios from 'axios';
 
 const TransactionForm = ({ onTransactionAdded }) => {
@@ -15,17 +16,14 @@ const TransactionForm = ({ onTransactionAdded }) => {
     'Electronics', 'Gas', 'Income', 'Other'
   ];
 
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
   const handleParse = async () => {
     if (!input.trim()) return;
 
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/transactions/parse', { input }, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      }
-      );
+      const response = await axios.post(`${API_BASE_URL}/api/transactions/parse`, { input });
       setParsedTransaction({
         ...response.data.parsed,
         originalInput: input
@@ -43,14 +41,9 @@ const TransactionForm = ({ onTransactionAdded }) => {
 
     setSaving(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/transactions', {
+      const response = await axios.post(`${API_BASE_URL}/api/transactions`, {
         ...parsedTransaction,
         aiParsed: true,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
       });
       
       onTransactionAdded(response.data);
@@ -85,11 +78,7 @@ const TransactionForm = ({ onTransactionAdded }) => {
         aiParsed: false
       };
 
-      const response = await axios.post('http://localhost:5000/api/transactions', transaction, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const response = await axios.post(`${API_BASE_URL}/api/transactions`, transaction);
       onTransactionAdded(response.data);
       e.target.reset();
       setShowForm(false);
@@ -115,7 +104,6 @@ const TransactionForm = ({ onTransactionAdded }) => {
         </button>
       </div>
 
-      {/* AI Natural Language Input */}
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -141,7 +129,6 @@ const TransactionForm = ({ onTransactionAdded }) => {
           </div>
         </div>
 
-        {/* AI Parsing Result */}
         {parsedTransaction && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-start justify-between mb-3">
@@ -191,7 +178,6 @@ const TransactionForm = ({ onTransactionAdded }) => {
         )}
       </div>
 
-      {/* Manual Entry Form */}
       {showForm && (
         <div className="mt-6 pt-6 border-t border-gray-200">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Manual Entry</h3>

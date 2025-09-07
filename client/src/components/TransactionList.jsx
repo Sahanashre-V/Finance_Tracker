@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Edit2, Trash2, Filter, Search } from 'lucide-react';
+import { Auth } from '../context/AuthContext';
 import axios from 'axios';
 
 const TransactionList = ({ transactions, onTransactionUpdated, onTransactionDeleted }) => {
@@ -14,6 +15,8 @@ const TransactionList = ({ transactions, onTransactionUpdated, onTransactionDele
     'Bills', 'Healthcare', 'Education', 'Travel',
     'Electronics', 'Gas', 'Income', 'Other'
   ];
+
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   const filteredTransactions = transactions.filter(transaction => {
     const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -34,12 +37,8 @@ const TransactionList = ({ transactions, onTransactionUpdated, onTransactionDele
 
   const handleSave = async (id) => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/transactions/${id}`, editForm, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      await
+      const response = await axios.put(`${API_BASE_URL}/api/transactions/${id}`, editForm);
+      
       onTransactionUpdated(response.data);
       setEditingId(null);
       setEditForm({});
@@ -56,11 +55,7 @@ const TransactionList = ({ transactions, onTransactionUpdated, onTransactionDele
     }
 
     try {
-      await axios.delete(`http://localhost:5000/api/transactions/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      await axios.delete(`${API_BASE_URL}/api/transactions/${id}`);
       onTransactionDeleted(id);
       alert('Transaction deleted successfully!');
     } catch (error) {
@@ -84,7 +79,6 @@ const TransactionList = ({ transactions, onTransactionUpdated, onTransactionDele
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <h2 className="text-xl font-bold text-gray-900">Transaction History</h2>
         
-        {/* Search and Filters */}
         <div className="flex flex-1 gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -120,7 +114,6 @@ const TransactionList = ({ transactions, onTransactionUpdated, onTransactionDele
         </div>
       </div>
 
-      {/* Transactions List */}
       <div className="space-y-3 max-h-96 overflow-y-auto">
         {filteredTransactions.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
@@ -130,7 +123,6 @@ const TransactionList = ({ transactions, onTransactionUpdated, onTransactionDele
           filteredTransactions.map((transaction) => (
             <div key={transaction._id} className="border border-gray-200 rounded-lg p-4">
               {editingId === transaction._id ? (
-                /* Edit Mode */
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                   <input
                     type="number"
@@ -170,7 +162,6 @@ const TransactionList = ({ transactions, onTransactionUpdated, onTransactionDele
                   </div>
                 </div>
               ) : (
-                /* Display Mode */
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-4">
