@@ -1,42 +1,36 @@
 import React, { useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { Link, useNavigate } from "react-router-dom";
-import { Auth } from '../context/AuthContext';
-import axios from 'axios';
+import { Auth } from '../context/AuthContext'; // Keep consistent with your existing import
 import "../App.css";
 
 export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = Auth();
+  const { googleLogin } = Auth(); // Fixed to match your Auth export
 
   const handleGoogleSuccess = async (credentialResponse) => {
     setIsLoading(true);
+    
     try {
-      const id_token = credentialResponse.credential;
-
-      const res = await axios.post("http://localhost:5000/api/auth/google", {
-        id_token,
-        action: "signin"
-      });
-
-      const data = res.data;
+      // Use the googleLogin function from context
+      const result = await googleLogin(credentialResponse);
       
-      if (res.status === 200) {
-        login(data.user, data.accessToken);
+      if (result.success) {
         navigate('/dashboard');
+      } else {
+        alert(result.error || "Sign in failed. Please try again.");
       }
-      localStorage.setItem('token', data.accessToken);
     } catch (error) {
       console.error("Sign in error:", error);
-      const message = error.response?.data?.message || "Network error. Please check your connection and try again.";
-      alert(message);
+      alert("Network error. Please check your connection and try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGoogleError = () => {
+    console.error("Google Sign In was cancelled or failed");
     alert("Google Sign In was cancelled or failed");
   };
 

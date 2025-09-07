@@ -3,10 +3,11 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
+// You can name this whatever you want! Let's call it Auth like you had originally
 export const Auth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
+    throw new Error('Auth must be used within AuthProvider');
   }
   return context;
 };
@@ -53,7 +54,7 @@ export const AuthProvider = ({ children }) => {
           setUser(JSON.parse(savedUser));
           
           // Verify token is still valid
-          const response = await axios.get('/auth/verify');
+          const response = await axios.get('/api/auth/verify');
           
           // If verification fails but no error thrown, logout
           if (!response.data?.valid) {
@@ -77,7 +78,7 @@ export const AuthProvider = ({ children }) => {
     
     if (typeof window !== 'undefined') {
       try {
-        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('token', accessToken);
         localStorage.setItem('user', JSON.stringify(userData));
       } catch (error) {
         console.warn('Failed to save to localStorage:', error);
@@ -91,7 +92,7 @@ export const AuthProvider = ({ children }) => {
     
     if (typeof window !== 'undefined') {
       try {
-        localStorage.removeItem('accessToken');
+        localStorage.removeItem('token');
         localStorage.removeItem('user');
       } catch (error) {
         console.warn('Failed to clear localStorage:', error);
@@ -108,7 +109,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const id_token = credentialResponse.credential;
 
-      const response = await axios.post('/auth/google', {
+      const response = await axios.post('/api/auth/google', {
         id_token,
         action: 'signin'
       });
@@ -142,7 +143,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const id_token = credentialResponse.credential;
 
-      const response = await axios.post('/auth/google', {
+      const response = await axios.post('/api/auth/google', {
         id_token,
         action: 'signup'
       });
@@ -172,7 +173,7 @@ export const AuthProvider = ({ children }) => {
   // Fixed: Add profile refresh function
   const refreshProfile = async () => {
     try {
-      const response = await axios.get('/auth/profile');
+      const response = await axios.get('/api/auth/profile');
       
       if (response.data?.user) {
         setUser(response.data.user);
@@ -193,9 +194,9 @@ export const AuthProvider = ({ children }) => {
     token,
     login,
     logout,
-    googleLogin,    // Fixed: Added Google login function
-    googleSignup,   // Fixed: Added Google signup function
-    refreshProfile, // Fixed: Added profile refresh function
+    googleLogin,    
+    googleSignup,   
+    refreshProfile, 
     loading,
     isAuthenticated: !!user
   };

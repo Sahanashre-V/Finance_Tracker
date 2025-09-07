@@ -5,9 +5,10 @@ import TransactionList from '../components/TransactionList';
 import Charts from '../components/Charts';
 import { TrendingUp, TrendingDown, DollarSign, PiggyBank, LogOut, User } from 'lucide-react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
-  const { user, logout } = Auth();
+  const { user, token, logout } = Auth();
   const [transactions, setTransactions] = useState([]);
   const [analytics, setAnalytics] = useState({
     summary: { income: 0, expenses: 0, savings: 0, savingsRate: 0 },
@@ -15,76 +16,53 @@ const Dashboard = () => {
     trends: []
   });
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState('30'); // days
+  const [dateRange, setDateRange] = useState('30');
+  const navigate = useNavigate();
 
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const endDate = new Date();
       const startDate = new Date();
       
-      // Improved date calculation
       const days = parseInt(dateRange);
       startDate.setDate(startDate.getDate() - days);
 
-      // Check if token exists
-      const token = localStorage.getItem('token');
       if (!token) {
         throw new Error('No authentication token found');
       }
 
-      console.log('Fetching data with date range:', {
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
-        days: dateRange
-      });
-
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-
       const [transactionsRes, summaryRes, categoriesRes, trendsRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/transactions', {
+        axios.get(`${API_BASE_URL}/api/transactions`, {
           params: {
             startDate: startDate.toISOString(),
             endDate: endDate.toISOString(),
             limit: 100
-          },
-          headers
+          }
         }),
-        axios.get('http://localhost:5000/api/analytics/summary', {
+        axios.get(`${API_BASE_URL}/api/analytics/summary`, {
           params: {
             startDate: startDate.toISOString(),
             endDate: endDate.toISOString()
-          },
-          headers
+          }
         }),
-        axios.get('http://localhost:5000/api/analytics/categories', {
+        axios.get(`${API_BASE_URL}/api/analytics/categories`, {
           params: {
             startDate: startDate.toISOString(),
             endDate: endDate.toISOString(),
             type: 'expense'
-          },
-          headers
+          }
         }),
-        axios.get('http://localhost:5000/api/analytics/trends', {
+        axios.get(`${API_BASE_URL}/api/analytics/trends`, {
           params: {
             period: 'daily',
             days: dateRange
-          },
-          headers
+          }
         })
       ]);
 
-      console.log('API Responses:', {
-        transactions: transactionsRes.data,
-        summary: summaryRes.data,
-        categories: categoriesRes.data,
-        trends: trendsRes.data
-      });
-
-      // Handle different response structures
       setTransactions(transactionsRes.data.transactions || transactionsRes.data || []);
       setAnalytics({
         summary: summaryRes.data || { income: 0, expenses: 0, savings: 0, savingsRate: 0 },
@@ -94,29 +72,23 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Failed to fetch data:', error);
       
-      // More detailed error handling
       if (error.response) {
-        console.error('Response error:', error.response.data);
-        console.error('Status:', error.response.status);
-        
         if (error.response.status === 401) {
           alert('Your session has expired. Please log in again.');
           logout();
+          navigate('/signin');
           return;
         }
-        
         alert(`Server error: ${error.response.data.message || error.response.status}`);
       } else if (error.request) {
-        console.error('Request error:', error.request);
         alert('Unable to connect to server. Please check if the server is running.');
       } else {
-        console.error('Error:', error.message);
         alert(`Error: ${error.message}`);
       }
     } finally {
       setLoading(false);
     }
-  }, [dateRange, logout]);
+  }, [dateRange, token, logout, navigate]);
 
   useEffect(() => {
     fetchData();
@@ -124,33 +96,33 @@ const Dashboard = () => {
 
   const handleTransactionAdded = useCallback((newTransaction) => {
     setTransactions(prev => [newTransaction, ...prev]);
-    fetchData(); // Refresh analytics
+    fetchData();
   }, [fetchData]);
 
   const handleTransactionUpdated = useCallback((updatedTransaction) => {
     setTransactions(prev => 
       prev.map(t => t._id === updatedTransaction._id ? updatedTransaction : t)
     );
-    fetchData(); // Refresh analytics
+    fetchData();
   }, [fetchData]);
 
   const handleTransactionDeleted = useCallback((deletedId) => {
     setTransactions(prev => prev.filter(t => t._id !== deletedId));
-    fetchData(); // Refresh analytics
+    fetchData();
   }, [fetchData]);
 
   const handleLogout = async () => {
     try {
-      await axios.post('http://localhost:5000/api/auth/logout');
-      localStorage.removeItem('token');
+      await axios.post(`${API_BASE_URL}/api/auth/logout`);
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Logout API error:', error);
     } finally {
       logout();
+      navigate('/signin');
     }
   };
 
-  if (loading) {
+  if (loading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -163,7 +135,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
@@ -183,7 +154,7 @@ const Dashboard = () => {
             
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                {user.picture && (
+                {user?.picture && (
                   <img
                     src={user.picture}
                     alt={user.name}
@@ -191,8 +162,8 @@ const Dashboard = () => {
                   />
                 )}
                 <div className="hidden sm:block">
-                  <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                  <p className="text-xs text-gray-500">{user.email}</p>
+                  <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                  <p className="text-xs text-gray-500">{user?.email}</p>
                 </div>
               </div>
               
@@ -209,7 +180,6 @@ const Dashboard = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center justify-between">
@@ -268,13 +238,8 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Transaction Form */}
         <TransactionForm onTransactionAdded={handleTransactionAdded} />
-
-        {/* Charts */}
         <Charts analytics={analytics} />
-
-        {/* Transaction List */}
         <TransactionList
           transactions={transactions}
           onTransactionUpdated={handleTransactionUpdated}
