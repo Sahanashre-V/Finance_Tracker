@@ -114,51 +114,65 @@ const Charts = ({ analytics }) => {
       <div className="bg-white rounded-xl shadow-lg p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Income vs Expenses</h3>
         {trendsData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={trendsData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis 
-                dataKey="date" 
-                tick={{ fontSize: 12 }}
-                tickFormatter={(value) => {
-                  try {
-                    const date = new Date(value);
-                    return `${date.getMonth() + 1}/${date.getDate()}`;
-                  } 
-                  catch {
-                    return value;
-                  }
-                }}
-              />
-              <YAxis 
-                tick={{ fontSize: 12 }}
-                tickFormatter={(value) => `$${value}`}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Line 
-                type="monotone" 
-                dataKey="income" 
-                stroke="#10B981" 
-                strokeWidth={3}
-                dot={{ fill: '#10B981', r: 4 }}
-                activeDot={{ r: 6 }}
-                name="Income"
-              />
-              <Line 
-                type="monotone" 
-                dataKey="expense" 
-                stroke="#EF4444" 
-                strokeWidth={3}
-                dot={{ fill: '#EF4444', r: 4 }}
-                activeDot={{ r: 6 }}
-                name="Expenses"
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          <>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={trendsData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis 
+                  dataKey="date" 
+                  tick={{ fontSize: 12 }}
+                  tickFormatter={(value) => {
+                    try {
+                      const date = new Date(value);
+                      return `${date.getMonth() + 1}/${date.getDate()}`;
+                    } 
+                    catch {
+                      return value;
+                    }
+                  }}
+                />
+                <YAxis 
+                  tick={{ fontSize: 12 }}
+                  tickFormatter={(value) => `$${value}`}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Line 
+                  type="monotone" 
+                  dataKey="income" 
+                  stroke="#10B981" 
+                  strokeWidth={3}
+                  dot={{ fill: '#10B981', r: 4 }}
+                  activeDot={{ r: 6 }}
+                  name="Income"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="expense" 
+                  stroke="#EF4444" 
+                  strokeWidth={3}
+                  dot={{ fill: '#EF4444', r: 4 }}
+                  activeDot={{ r: 6 }}
+                  name="Expenses"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+            
+            {/* Line Chart Legend */}
+            <div className="flex justify-center gap-6 mt-4">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                <span className="text-sm text-gray-600 font-medium">Income</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+                <span className="text-sm text-gray-600 font-medium">Expenses</span>
+              </div>
+            </div>
+          </>
         ) : (
           <div className="h-80 flex flex-col items-center justify-center text-gray-400">
             <svg className="h-16 w-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1-1H5a1 1 0 01-1-1V4z" />
             </svg>
             <p className="text-center text-lg font-medium">No Trend Data</p>
             <p className="text-center text-sm">Add transactions over time to see income vs expense trends</p>
