@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Brain, Check, X } from 'lucide-react';
-import { Auth } from '../context/AuthContext';
+import { Plus, Brain, Check, X, AlertCircle } from 'lucide-react';
 import axios from 'axios';
 
 const TransactionForm = ({ onTransactionAdded }) => {
@@ -9,6 +8,7 @@ const TransactionForm = ({ onTransactionAdded }) => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [error, setError] = useState('');
 
   const categories = [
     'Food', 'Transportation', 'Shopping', 'Entertainment',
@@ -19,18 +19,51 @@ const TransactionForm = ({ onTransactionAdded }) => {
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   const handleParse = async () => {
-    if (!input.trim()) return;
+    if (!input.trim()) {
+      setError('Please enter a transaction description');
+      return;
+    }
 
     setLoading(true);
+    setError('');
+    
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/transactions/parse`, { input });
-      setParsedTransaction({
-        ...response.data.parsed,
-        originalInput: input
-      });
+      console.log('Parsing transaction:', input);
+      
+      const response = await axios.post(
+        `${API_BASE_URL}/api/transactions/parse`, 
+        { input: input.trim() },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+      
+      console.log('Parse response:', response.data);
+      
+      if (response.data.success && response.data.parsed) {
+        setParsedTransaction({
+          ...response.data.parsed,
+          originalInput: input
+        });
+        setError('');
+      } else {
+        throw new Error(response.data.message || 'Failed to parse transaction');
+      }
+      
     } catch (error) {
       console.error('Parse error:', error);
-      alert('Failed to parse transaction. Please try again.');
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Failed to parse transaction. Please try again.';
+      
+      setError(errorMessage);
+      
+      // Show error alert
+      alert(`Parse Error: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -40,20 +73,53 @@ const TransactionForm = ({ onTransactionAdded }) => {
     if (!parsedTransaction) return;
 
     setSaving(true);
+    setError('');
+    
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/transactions`, {
-        ...parsedTransaction,
-        aiParsed: true,
-      });
+      console.log('Saving transaction:', parsedTransaction);
       
-      onTransactionAdded(response.data);
-      setInput('');
-      setParsedTransaction(null);
-      setShowForm(false);
-      alert('Transaction added successfully!');
+      const response = await axios.post(
+        `${API_BASE_URL}/api/transactions`,
+        {
+          ...parsedTransaction,
+          aiParsed: true,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+      
+      console.log('Save response:', response.data);
+      
+      if (response.data.success && response.data.transaction) {
+        // Call the parent callback
+        if (onTransactionAdded) {
+          onTransactionAdded(response.data.transaction);
+        }
+        
+        // Reset form
+        setInput('');
+        setParsedTransaction(null);
+        setShowForm(false);
+        setError('');
+        
+        alert('Transaction added successfully!');
+      } else {
+        throw new Error(response.data.message || 'Failed to save transaction');
+      }
+      
     } catch (error) {
       console.error('Save error:', error);
-      alert('Failed to save transaction. Please try again.');
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Failed to save transaction. Please try again.';
+      
+      setError(errorMessage);
+      alert(`Save Error: ${errorMessage}`);
     } finally {
       setSaving(false);
     }
@@ -62,6 +128,7 @@ const TransactionForm = ({ onTransactionAdded }) => {
   const handleReject = () => {
     setParsedTransaction(null);
     setInput('');
+    setError('');
   };
 
   const handleManualSubmit = async (e) => {
@@ -69,6 +136,8 @@ const TransactionForm = ({ onTransactionAdded }) => {
     const formData = new FormData(e.target);
     
     setSaving(true);
+    setError('');
+    
     try {
       const transaction = {
         amount: parseFloat(formData.get('amount')),
@@ -77,15 +146,45 @@ const TransactionForm = ({ onTransactionAdded }) => {
         type: formData.get('type'),
         aiParsed: false
       };
+      
+      console.log('Manual transaction:', transaction);
 
-      const response = await axios.post(`${API_BASE_URL}/api/transactions`, transaction);
-      onTransactionAdded(response.data);
-      e.target.reset();
-      setShowForm(false);
-      alert('Transaction added successfully!');
+      const response = await axios.post(
+        `${API_BASE_URL}/api/transactions`, 
+        transaction,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+      
+      if (response.data.success && response.data.transaction) {
+        // Call the parent callback
+        if (onTransactionAdded) {
+          onTransactionAdded(response.data.transaction);
+        }
+        
+        // Reset form
+        e.target.reset();
+        setShowForm(false);
+        setError('');
+        
+        alert('Transaction added successfully!');
+      } else {
+        throw new Error(response.data.message || 'Failed to save transaction');
+      }
+      
     } catch (error) {
-      console.error('Save error:', error);
-      alert('Failed to save transaction. Please try again.');
+      console.error('Manual save error:', error);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Failed to save transaction. Please try again.';
+      
+      setError(errorMessage);
+      alert(`Save Error: ${errorMessage}`);
     } finally {
       setSaving(false);
     }
@@ -104,19 +203,30 @@ const TransactionForm = ({ onTransactionAdded }) => {
         </button>
       </div>
 
+      {/* Error Display */}
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <span className="text-sm">{error}</span>
+        </div>
+      )}
+
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Describe your transaction
+            Describe your transaction (powered by AI)
           </label>
           <div className="flex gap-2">
             <input
               type="text"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => {
+                setInput(e.target.value);
+                if (error) setError(''); // Clear error when typing
+              }}
               placeholder="e.g., 'Bought coffee at Starbucks for $5.50'"
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              onKeyPress={(e) => e.key === 'Enter' && handleParse()}
+              onKeyPress={(e) => e.key === 'Enter' && !loading && handleParse()}
             />
             <button
               onClick={handleParse}
@@ -124,7 +234,7 @@ const TransactionForm = ({ onTransactionAdded }) => {
               className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <Brain className="w-4 h-4" />
-              {loading ? 'Parsing...' : 'Parse'}
+              {loading ? 'Parsing...' : 'Parse with AI'}
             </button>
           </div>
         </div>
@@ -132,9 +242,9 @@ const TransactionForm = ({ onTransactionAdded }) => {
         {parsedTransaction && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-start justify-between mb-3">
-              <h3 className="font-medium text-blue-900">AI Parsed Transaction</h3>
+              <h3 className="font-medium text-blue-900">🤖 AI Parsed Transaction</h3>
               <div className="text-sm text-blue-700">
-                Confidence: {Math.round(parsedTransaction.confidence * 100)}%
+                Confidence: {Math.round((parsedTransaction.confidence || 0.8) * 100)}%
               </div>
             </div>
             
@@ -149,13 +259,23 @@ const TransactionForm = ({ onTransactionAdded }) => {
               </div>
               <div>
                 <span className="text-xs text-blue-600 uppercase tracking-wide">Type</span>
-                <div className="font-semibold text-blue-900 capitalize">{parsedTransaction.type}</div>
+                <div className="font-semibold text-blue-900 capitalize">
+                  {parsedTransaction.type}
+                  {parsedTransaction.type === 'income' ? ' 💰' : ' 💸'}
+                </div>
               </div>
               <div>
                 <span className="text-xs text-blue-600 uppercase tracking-wide">Description</span>
                 <div className="font-semibold text-blue-900 truncate">{parsedTransaction.description}</div>
               </div>
             </div>
+
+            {parsedTransaction.merchant && (
+              <div className="mb-4">
+                <span className="text-xs text-blue-600 uppercase tracking-wide">Merchant</span>
+                <div className="font-semibold text-blue-900">{parsedTransaction.merchant}</div>
+              </div>
+            )}
 
             <div className="flex gap-2">
               <button
@@ -171,7 +291,7 @@ const TransactionForm = ({ onTransactionAdded }) => {
                 className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
               >
                 <X className="w-4 h-4" />
-                Reject
+                Reject & Try Again
               </button>
             </div>
           </div>
@@ -188,6 +308,7 @@ const TransactionForm = ({ onTransactionAdded }) => {
                 type="number"
                 name="amount"
                 step="0.01"
+                min="0.01"
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="0.00"
@@ -202,8 +323,8 @@ const TransactionForm = ({ onTransactionAdded }) => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Select type</option>
-                <option value="expense">Expense</option>
-                <option value="income">Income</option>
+                <option value="expense">Expense 💸</option>
+                <option value="income">Income 💰</option>
               </select>
             </div>
 
