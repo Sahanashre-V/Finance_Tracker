@@ -3,7 +3,7 @@ import { Auth } from '../context/AuthContext';
 import TransactionForm from '../components/TransactionForm';
 import TransactionList from '../components/TransactionList';
 import Charts from '../components/Charts';
-import { TrendingUp, TrendingDown, DollarSign, PiggyBank, LogOut, User } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, PiggyBank, LogOut, User, Wallet, Sparkles } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -124,41 +124,63 @@ const Dashboard = () => {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center" style={{fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"}}>
+        {/* Background decorations */}
+        <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse delay-1000"></div>
+        
+        <div className="text-center relative z-10">
+          <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <Wallet className="w-8 h-8 text-white" />
+          </div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Loading your dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b border-gray-200">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      {/* Background decorations */}
+      <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
+      <div className="absolute top-40 right-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse delay-1000"></div>
+      
+      <header className="bg-white/95 backdrop-blur-xl shadow-lg relative z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold text-gray-900">FinanceAI</h1>
-              <select
-                value={dateRange}
-                onChange={(e) => setDateRange(e.target.value)}
-                className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="7">Last 7 days</option>
-                <option value="30">Last 30 days</option>
-                <option value="90">Last 3 months</option>
-                <option value="365">Last year</option>
-              </select>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Wallet className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  WealthWise
+                </span>
+              </div>
+              
+              <div className="ml-6 inline-flex items-center bg-gradient-to-r from-emerald-100 to-teal-100 rounded-full px-4 py-2 border border-emerald-200">
+                <Sparkles className="w-4 h-4 text-emerald-600 mr-2" />
+                <select
+                  value={dateRange}
+                  onChange={(e) => setDateRange(e.target.value)}
+                  className="bg-transparent text-emerald-700 font-semibold text-sm border-none outline-none cursor-pointer"
+                >
+                  <option value="7">Last 7 days</option>
+                  <option value="30">Last 30 days</option>
+                  <option value="90">Last 3 months</option>
+                  <option value="365">Last year</option>
+                </select>
+              </div>
             </div>
             
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-2 border border-gray-200">
                 {user?.picture && (
                   <img
                     src={user.picture}
                     alt={user.name}
-                    className="w-8 h-8 rounded-full"
+                    className="w-8 h-8 rounded-full border-2 border-emerald-200"
                   />
                 )}
                 <div className="hidden sm:block">
@@ -169,7 +191,7 @@ const Dashboard = () => {
               
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-red-600 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
               >
                 <LogOut className="w-4 h-4" />
                 <span className="hidden sm:inline">Logout</span>
@@ -179,9 +201,9 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-6 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-gray-200 hover:bg-white/90 transition-all group">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Income</p>
@@ -189,13 +211,13 @@ const Dashboard = () => {
                   ${(analytics.summary.income || 0).toFixed(2)}
                 </p>
               </div>
-              <div className="p-3 bg-green-100 rounded-full">
+              <div className="p-3 bg-green-100 rounded-full group-hover:scale-110 transition-transform">
                 <TrendingUp className="w-6 h-6 text-green-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-gray-200 hover:bg-white/90 transition-all group">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Expenses</p>
@@ -203,48 +225,61 @@ const Dashboard = () => {
                   ${(analytics.summary.expenses || 0).toFixed(2)}
                 </p>
               </div>
-              <div className="p-3 bg-red-100 rounded-full">
+              <div className="p-3 bg-red-100 rounded-full group-hover:scale-110 transition-transform">
                 <TrendingDown className="w-6 h-6 text-red-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-gray-200 hover:bg-white/90 transition-all group">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Net Savings</p>
-                <p className={`text-2xl font-bold ${(analytics.summary.savings || 0) >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                <p className={`text-2xl font-bold ${(analytics.summary.savings || 0) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                   ${(analytics.summary.savings || 0).toFixed(2)}
                 </p>
               </div>
-              <div className="p-3 bg-blue-100 rounded-full">
-                <PiggyBank className="w-6 h-6 text-blue-600" />
+              <div className="p-3 bg-emerald-100 rounded-full group-hover:scale-110 transition-transform">
+                <PiggyBank className="w-6 h-6 text-emerald-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-gray-200 hover:bg-white/90 transition-all group">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Savings Rate</p>
-                <p className={`text-2xl font-bold ${(analytics.summary.savingsRate || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <p className={`text-2xl font-bold ${(analytics.summary.savingsRate || 0) >= 0 ? 'text-teal-600' : 'text-red-600'}`}>
                   {(analytics.summary.savingsRate || 0).toFixed(1)}%
                 </p>
               </div>
-              <div className="p-3 bg-yellow-100 rounded-full">
-                <DollarSign className="w-6 h-6 text-yellow-600" />
+              <div className="p-3 bg-teal-100 rounded-full group-hover:scale-110 transition-transform">
+                <DollarSign className="w-6 h-6 text-teal-600" />
               </div>
             </div>
           </div>
         </div>
 
-        <TransactionForm onTransactionAdded={handleTransactionAdded} />
-        <Charts analytics={analytics} />
-        <TransactionList
-          transactions={transactions}
-          onTransactionUpdated={handleTransactionUpdated}
-          onTransactionDeleted={handleTransactionDeleted}
-        />
+        <div className="space-y-6">
+          {/* Transaction Form Container */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 p-6">
+            <TransactionForm onTransactionAdded={handleTransactionAdded} />
+          </div>
+
+          {/* Charts Container */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 p-6">
+            <Charts analytics={analytics} />
+          </div>
+
+          {/* Transaction List Container */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 p-6">
+            <TransactionList
+              transactions={transactions}
+              onTransactionUpdated={handleTransactionUpdated}
+              onTransactionDeleted={handleTransactionDeleted}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

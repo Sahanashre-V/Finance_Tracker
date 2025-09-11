@@ -6,10 +6,10 @@ const router = express.Router();
 
 router.get('/analytics/summary', verifyToken, async (req, res) => {
   try {
-    console.log('Summary request with raw queries:', {
-      userId: req.user.userId,
-      query: req.query
-    });
+    // console.log('Summary request with raw queries:', {
+    //   userId: req.user.userId,
+    //   query: req.query
+    // });
 
     const { startDate, endDate } = req.query;
     let dateFilter = { userId: req.user.userId };
@@ -24,7 +24,7 @@ router.get('/analytics/summary', verifyToken, async (req, res) => {
       }
     }
 
-    console.log('Date filter:', dateFilter);
+    // console.log('Date filter:', dateFilter);
 
     // Raw queries instead of aggregation
     const incomeTransactions = await Transaction.find({ 
@@ -37,8 +37,8 @@ router.get('/analytics/summary', verifyToken, async (req, res) => {
       type: 'expense' 
     });
 
-    console.log('Found income transactions:', incomeTransactions.length);
-    console.log('Found expense transactions:', expenseTransactions.length);
+    // console.log('Found income transactions:', incomeTransactions.length);
+    // console.log('Found expense transactions:', expenseTransactions.length);
 
     // Calculate totals manually
     const income = incomeTransactions.reduce((total, transaction) => {
@@ -59,7 +59,7 @@ router.get('/analytics/summary', verifyToken, async (req, res) => {
       savingsRate 
     };
 
-    console.log('Summary result from raw queries:', result);
+    // console.log('Summary result from raw queries:', result);
     res.json(result);
   } catch (error) {
     console.error('Summary error:', error);
@@ -70,7 +70,7 @@ router.get('/analytics/summary', verifyToken, async (req, res) => {
 // Categories - Using raw database queries
 router.get('/analytics/categories', verifyToken, async (req, res) => {
   try {
-    console.log('Categories request with raw queries');
+    // console.log('Categories request with raw queries');
 
     const { startDate, endDate, type = 'expense' } = req.query;
     let categoryFilter = { userId: req.user.userId, type };
@@ -81,11 +81,11 @@ router.get('/analytics/categories', verifyToken, async (req, res) => {
       if (endDate) categoryFilter.date.$lte = new Date(endDate);
     }
 
-    console.log('Categories filter:', categoryFilter);
+    // console.log('Categories filter:', categoryFilter);
 
     // Get all transactions of the specified type
     const transactions = await Transaction.find(categoryFilter);
-    console.log('Found transactions for categories:', transactions.length);
+    // console.log('Found transactions for categories:', transactions.length);
 
     // Group by category manually
     const categoryMap = {};
@@ -109,7 +109,7 @@ router.get('/analytics/categories', verifyToken, async (req, res) => {
     const result = Object.values(categoryMap)
       .sort((a, b) => b.amount - a.amount);
 
-    console.log('Categories result from raw queries:', result);
+    // console.log('Categories result from raw queries:', result);
     res.json(result);
   } catch (error) {
     console.error('Categories error:', error);
@@ -120,7 +120,7 @@ router.get('/analytics/categories', verifyToken, async (req, res) => {
 // Trends - Using raw database queries
 router.get('/analytics/trends', verifyToken, async (req, res) => {
   try {
-    console.log('Trends request with raw queries');
+    // console.log('Trends request with raw queries');
 
     const { period = 'daily', days = 30 } = req.query;
     const endDate = new Date();
@@ -128,11 +128,11 @@ router.get('/analytics/trends', verifyToken, async (req, res) => {
     const daysNum = parseInt(days);
     startDate.setDate(startDate.getDate() - daysNum);
 
-    console.log('Trends date range:', {
-      startDate,
-      endDate,
-      days: daysNum
-    });
+    // console.log('Trends date range:', {
+    //   startDate,
+    //   endDate,
+    //   days: daysNum
+    // });
 
     const trendsFilter = { 
       userId: req.user.userId, 
@@ -141,7 +141,7 @@ router.get('/analytics/trends', verifyToken, async (req, res) => {
 
     // Get all transactions in the date range
     const transactions = await Transaction.find(trendsFilter);
-    console.log('Found transactions for trends:', transactions.length);
+    // console.log('Found transactions for trends:', transactions.length);
 
     // Group by date and type manually
     const trendsMap = {};
@@ -184,7 +184,7 @@ router.get('/analytics/trends', verifyToken, async (req, res) => {
         return 0;
       });
 
-    console.log('Trends result from raw queries:', result);
+    // console.log('Trends result from raw queries:', result);
     res.json(result);
   } catch (error) {
     console.error('Trends error:', error);

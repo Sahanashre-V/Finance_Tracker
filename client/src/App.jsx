@@ -6,8 +6,8 @@ import LandingPage from "./pages/LandingPage";
 import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
-import SignIn from "./pages/signin";
-
+import SignIn from "./pages/SignIn";
+import './index.css';
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 export default function App() {
