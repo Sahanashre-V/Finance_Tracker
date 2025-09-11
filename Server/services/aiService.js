@@ -5,7 +5,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 async function parseTransaction(input, recentTransactions = []) {
   try {
-    console.log('Starting AI parsing for input:', input);
+    // console.log('Starting AI parsing for input:', input);
     
     // Get the Gemini model
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
@@ -31,7 +31,7 @@ Return only valid JSON:
 Analyze the transaction intelligently and categorize appropriately.
 `;
 
-    console.log('Sending request to Gemini AI...');
+    // console.log('Sending request to Gemini AI...');
     
     // Call Gemini AI
     const result = await model.generateContent(prompt);
@@ -46,7 +46,7 @@ Analyze the transaction intelligently and categorize appropriately.
     }
     
     const parsedData = JSON.parse(jsonMatch[0]);
-    console.log('Parsed JSON data:', parsedData);
+    // console.log('Parsed JSON data:', parsedData);
 
     // Validate categories
     const validCategories = [
@@ -65,7 +65,7 @@ Analyze the transaction intelligently and categorize appropriately.
       confidence: Math.max(0, Math.min(1, parseFloat(parsedData.confidence) || 0.7))
     };
 
-    console.log('Final parsed result:', result_data);
+    // console.log('Final parsed result:', result_data);
     return result_data;
 
   } catch (error) {
@@ -82,7 +82,7 @@ Analyze the transaction intelligently and categorize appropriately.
       confidence: 0.3
     };
 
-    console.log('Using fallback result:', fallbackResult);
+    // console.log('Using fallback result:', fallbackResult);
     return fallbackResult;
   }
 }

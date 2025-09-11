@@ -9,7 +9,7 @@ const router = express.Router();
 router.post('/transactions/parse', verifyToken, async (req, res) => {
   try {
     const { input } = req.body;
-    console.log("Received parse request:", { input, userId: req.user.userId });
+    // console.log("Received parse request:", { input, userId: req.user.userId });
     
     if (!input?.trim()) {
       return res.status(400).json({ 
@@ -27,12 +27,12 @@ router.post('/transactions/parse', verifyToken, async (req, res) => {
     .select('description category amount type')
     .lean();
 
-    console.log(`Found ${recentTransactions.length} recent transactions for context`);
+    // console.log(`Found ${recentTransactions.length} recent transactions for context`);
 
     // Parse with Gemini AI
     const parsed = await parseTransaction(input.trim(), recentTransactions);
     
-    console.log("Parsed result:", parsed);
+    // console.log("Parsed result:", parsed);
 
     res.json({ 
       success: true,
@@ -65,7 +65,7 @@ router.post('/transactions', verifyToken, async (req, res) => {
       originalInput 
     } = req.body;
     
-    console.log("Creating transaction:", { amount, description, category, type, aiParsed });
+    // console.log("Creating transaction:", { amount, description, category, type, aiParsed });
     
     // Validate required fields
     if (!amount || !description || !category || !type) {
@@ -119,7 +119,7 @@ router.post('/transactions', verifyToken, async (req, res) => {
       originalInput: originalInput || null
     });
     
-    console.log("Created transaction:", transaction._id);
+    // console.log("Created transaction:", transaction._id);
     
     res.status(201).json({
       success: true,
@@ -181,7 +181,7 @@ router.get('/transactions', verifyToken, async (req, res) => {
 
     const total = await Transaction.countDocuments(query);
 
-    console.log(`Found ${transactions.length} transactions (${total} total) for user ${req.user.userId}`);
+    // console.log(`Found ${transactions.length} transactions (${total} total) for user ${req.user.userId}`);
 
     res.json({ 
       success: true,
@@ -247,7 +247,7 @@ router.put('/transactions/:id', verifyToken, async (req, res) => {
       });
     }
     
-    console.log("Updated transaction:", transaction._id);
+    // console.log("Updated transaction:", transaction._id);
     
     res.json({
       success: true,
@@ -289,7 +289,7 @@ router.delete('/transactions/:id', verifyToken, async (req, res) => {
       });
     }
     
-    console.log("Deleted transaction:", transaction._id);
+    // console.log("Deleted transaction:", transaction._id);
     
     res.json({ 
       success: true,
