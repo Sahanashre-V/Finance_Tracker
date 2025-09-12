@@ -1,37 +1,79 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Menu, X, Brain, TrendingUp, Shield, Zap, 
-  BarChart3, PieChart, Wallet, ArrowRight,
-  Star, Check, Users, DollarSign, Target,
-  ChevronRight, Github, Twitter, Linkedin,
-  PlayCircle, Sparkles, Lock, Clock, Building,
-  Globe
-} from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import {
+  Menu,
+  X,
+  Brain,
+  TrendingUp,
+  Shield,
+  Zap,
+  BarChart3,
+  PieChart,
+  Wallet,
+  ArrowRight,
+  Star,
+  Check,
+  Users,
+  DollarSign,
+  Target,
+  ChevronRight,
+  Github,
+  Twitter,
+  Linkedin,
+  PlayCircle,
+  Sparkles,
+  Lock,
+  Clock,
+  Building,
+  Globe,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const LandingPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
+  const navigate = useNavigate();
+
+  const handleSignIn = () => {
+    navigate("/signin");
+  };
+  const handleSignUp = () => {
+    navigate("/signup");
+  };
+  const handleAbout = () => {
+    navigate("/about");
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const stats = [
-    { number: "1K+", label: "Active Users", icon: <Users className="w-6 h-6" /> },
-    { number: "99.9%", label: "AI Accuracy", icon: <Target className="w-6 h-6" /> },
-    { number: "4.9★", label: "App Rating", icon: <Star className="w-6 h-6" /> }
+    {
+      number: "1K+",
+      label: "Active Users",
+      icon: <Users className="w-6 h-6" />,
+    },
+    {
+      number: "99.9%",
+      label: "AI Accuracy",
+      icon: <Target className="w-6 h-6" />,
+    },
+    { number: "4.9★", label: "App Rating", icon: <Star className="w-6 h-6" /> },
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Navigation */}
-      <nav className={`fixed w-full z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white/95 backdrop-blur-xl shadow-lg' : 'bg-transparent'
-      }`}>
+      <nav
+        className={`fixed w-full z-50 transition-all duration-300 ${
+          scrolled ? "bg-white/95 backdrop-blur-xl shadow-lg" : "bg-transparent"
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
@@ -43,26 +85,38 @@ const LandingPage = () => {
               </span>
             </div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-gray-600 hover:text-emerald-600 font-medium transition-colors">Features</a>
-              <a href="#how-it-works" className="text-gray-600 hover:text-emerald-600 font-medium transition-colors">How It Works</a>
-              <a href="#testimonials" className="text-gray-600 hover:text-emerald-600 font-medium transition-colors">Reviews</a>
-              <a href="#pricing" className="text-gray-600 hover:text-emerald-600 font-medium transition-colors">Pricing</a>
-              <button className="text-gray-600 hover:text-emerald-600 font-medium px-4 py-2 rounded-lg hover:bg-emerald-50 transition-all">
+            {/* Desktop Navigation - All buttons grouped on the right */}
+            <div className="hidden md:flex items-center space-x-4">
+              <button
+                onClick={handleAbout}
+                className="text-gray-600 hover:text-emerald-600 font-medium px-4 py-2 rounded-lg hover:bg-emerald-50 transition-all"
+              >
+                About
+              </button>
+              <button
+                onClick={handleSignIn}
+                className="text-gray-600 hover:text-emerald-600 font-medium px-4 py-2 rounded-lg hover:bg-emerald-50 transition-all"
+              >
                 Sign In
               </button>
-              <button className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-emerald-200">
+              <button
+                onClick={handleSignUp}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-emerald-200"
+              >
                 Get Started Free
               </button>
             </div>
 
             {/* Mobile menu button */}
-            <button 
+            <button
               className="md:hidden p-2 text-gray-600"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
             </button>
           </div>
 
@@ -70,18 +124,24 @@ const LandingPage = () => {
           {isMenuOpen && (
             <div className="md:hidden bg-white/95 backdrop-blur-xl rounded-xl mb-4 p-6 shadow-xl">
               <div className="flex flex-col space-y-4">
-                <a href="#features" className="text-gray-600 hover:text-emerald-600 font-medium py-2">Features</a>
-                <a href="#how-it-works" className="text-gray-600 hover:text-emerald-600 font-medium py-2">How It Works</a>
-                <a href="#testimonials" className="text-gray-600 hover:text-emerald-600 font-medium py-2">Reviews</a>
-                <a href="#pricing" className="text-gray-600 hover:text-emerald-600 font-medium py-2">Pricing</a>
-                <div className="border-t border-gray-200 pt-4">
-                  <button className="text-gray-600 hover:text-emerald-600 font-medium text-left py-2 w-full">
-                    Sign In
-                  </button>
-                  <button className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-3 rounded-xl font-semibold w-full mt-2">
-                    Get Started Free
-                  </button>
-                </div>
+                <button
+                  onClick={handleAbout}
+                  className="text-gray-600 hover:text-emerald-600 font-medium py-2 text-left"
+                >
+                  About
+                </button>
+                <button
+                  onClick={handleSignIn}
+                  className="text-gray-600 hover:text-emerald-600 font-medium text-left py-2 w-full"
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={handleSignUp}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-3 rounded-xl font-semibold w-full"
+                >
+                  Get Started Free
+                </button>
               </div>
             </div>
           )}
@@ -93,14 +153,16 @@ const LandingPage = () => {
         {/* Background decorations */}
         <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
         <div className="absolute top-40 right-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse delay-1000"></div>
-        
+
         <div className="max-w-7xl mx-auto relative">
           <div className="text-center max-w-4xl mx-auto">
             <div className="mb-6 inline-flex items-center bg-gradient-to-r from-emerald-100 to-teal-100 rounded-full px-6 py-3 border border-emerald-200">
               <Sparkles className="w-5 h-5 text-emerald-600 mr-2" />
-              <span className="text-emerald-700 font-semibold text-sm">AI-Powered Financial Assistant</span>
+              <span className="text-emerald-700 font-semibold text-sm">
+                AI-Powered Financial Assistant
+              </span>
             </div>
-            
+
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight">
               <span className="text-gray-900">Smart Finance</span>
               <br />
@@ -108,10 +170,11 @@ const LandingPage = () => {
                 Made Simple
               </span>
             </h1>
-            
+
             <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
-              Say goodbye to manual expense tracking. Just describe your transaction in plain English, 
-              and our AI handles categorization, amounts, and insights automatically.
+              Say goodbye to manual expense tracking. Just describe your
+              transaction in plain English, and our AI handles categorization,
+              amounts, and insights automatically.
             </p>
 
             {/* Demo Input */}
@@ -120,7 +183,9 @@ const LandingPage = () => {
                 <div className="text-left">
                   <p className="text-sm text-gray-500 mb-2">Try it yourself:</p>
                   <div className="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-300">
-                    <p className="text-gray-400 italic">"Bought coffee at Starbucks for $5.50"</p>
+                    <p className="text-gray-400 italic">
+                      "Bought coffee at Starbucks for $5.50"
+                    </p>
                   </div>
                   <div className="mt-4 flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
@@ -129,7 +194,9 @@ const LandingPage = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span className="text-gray-600">Category: Food & Drink</span>
+                      <span className="text-gray-600">
+                        Category: Food & Drink
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
@@ -143,11 +210,16 @@ const LandingPage = () => {
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
               {stats.map((stat, index) => (
-                <div key={index} className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 hover:bg-white/80 transition-all group">
+                <div
+                  key={index}
+                  className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 hover:bg-white/80 transition-all group"
+                >
                   <div className="text-emerald-600 mb-3 flex justify-center group-hover:scale-110 transition-transform">
                     {stat.icon}
                   </div>
-                  <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{stat.number}</div>
+                  <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                    {stat.number}
+                  </div>
                   <div className="text-gray-600 font-medium">{stat.label}</div>
                 </div>
               ))}
@@ -156,37 +228,35 @@ const LandingPage = () => {
         </div>
       </section>
 
-{/* Centered Professional Footer */}
-<footer className="bg-gray-900 py-8 px-6">
-  <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
-    
-    {/* Text */}
-    <p className="text-gray-300 font-bold text-lg">
-      © 2025 WealthWise. All rights reserved.
-    </p>
-    <p className="text-gray-400 text-base mt-2">
-      Made with <span className="text-emerald-400">❤️</span> for better financial wellness
-    </p>
+      {/* Centered Professional Footer */}
+      <footer className="bg-gray-900 py-8 px-6">
+        <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
+          {/* Text */}
+          <p className="text-gray-300 font-bold text-lg">
+            © 2025 WealthWise. All rights reserved.
+          </p>
+          <p className="text-gray-400 text-base mt-2">
+            Made with <span className="text-emerald-400">❤️</span> for better
+            financial wellness
+          </p>
 
-    {/* Socials */}
-    <div className="flex space-x-4 mt-6">
-      <a
-        href="https://github.com/Sahanashre-V/"
-        className="w-11 h-11 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 hover:text-white hover:bg-emerald-600 transition-all"
-      >
-        <Github className="w-5 h-5" />
-      </a>
-      <a
-        href="https://www.linkedin.com/in/sahanashre-v/"
-        className="w-11 h-11 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 hover:text-white hover:bg-emerald-600 transition-all"
-      >
-        <Linkedin className="w-5 h-5" />
-      </a>
-    </div>
-  </div>
-</footer>
-
-
+          {/* Socials */}
+          <div className="flex space-x-4 mt-6">
+            <a
+              href="https://github.com/Sahanashre-V/"
+              className="w-11 h-11 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 hover:text-white hover:bg-emerald-600 transition-all"
+            >
+              <Github className="w-5 h-5" />
+            </a>
+            <a
+              href="https://www.linkedin.com/in/sahanashre-v/"
+              className="w-11 h-11 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 hover:text-white hover:bg-emerald-600 transition-all"
+            >
+              <Linkedin className="w-5 h-5" />
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
