@@ -3,7 +3,7 @@ import { Auth } from '../context/AuthContext';
 import TransactionForm from '../components/TransactionForm';
 import TransactionList from '../components/TransactionList';
 import Charts from '../components/Charts';
-import { TrendingUp, TrendingDown, DollarSign, PiggyBank, LogOut, User, Wallet, Sparkles } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, PiggyBank, LogOut, User, Wallet, Sparkles, Github, Linkedin } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -281,6 +281,36 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 py-8 px-6">
+        <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
+          {/* Text */}
+          <p className="text-gray-300 font-bold text-lg">
+            © 2025 WealthWise. All rights reserved.
+          </p>
+          <p className="text-gray-400 text-base mt-2">
+            Made with <span className="text-emerald-400">❤️</span> for better
+            financial wellness
+          </p>
+
+          {/* Socials */}
+          <div className="flex space-x-4 mt-6">
+            <a
+              href="https://github.com/Sahanashre-V/"
+              className="w-11 h-11 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 hover:text-white hover:bg-emerald-600 transition-all"
+            >
+              <Github className="w-5 h-5" />
+            </a>
+            <a
+              href="https://www.linkedin.com/in/sahanashre-v/"
+              className="w-11 h-11 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 hover:text-white hover:bg-emerald-600 transition-all"
+            >
+              <Linkedin className="w-5 h-5" />
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
