@@ -10,12 +10,14 @@ export default function SignUp() {
   const navigate = useNavigate();
   const { login } = Auth();
 
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
   const handleGoogleSuccess = async (credentialResponse) => {
     setIsLoading(true);
     try {
       const id_token = credentialResponse.credential;
 
-      const res = await axios.post("http://localhost:5000/api/auth/google", {
+      const res = await axios.post(`${API_BASE_URL}/api/auth/google`, {
         id_token,
         action: "signup"
       });
